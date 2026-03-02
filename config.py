@@ -8,56 +8,30 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)-8s[%(name)s] {%(filename)s:%(lineno)d} -> %(message)s'
 )
 
-# 请求头
 HEADERS = {
     "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
                   'AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/103.0.0.0 Safari/537.36',
-    # 填写自己的cookie
     "Cookie": ''
 }
 
-# 监控的起始时间(仅在此时间之后发布的帖子才进行监控),默认为今天
 START_TIME = datetime.datetime.combine(
     datetime.date.today(), datetime.time.min)
 
-# 需要监控的豆瓣小组集合
+# 豆瓣小组列表 - 厦门租房相关小组
 GROUP_LIST = [
-    {"id": "106955", "name": "深圳租房团", "start_time": START_TIME},
-    {"id": "592828", "name": "罗湖租房", "start_time": START_TIME},
-    {"id": "637628", "name": "深圳租房", "start_time": START_TIME},
-    {"id": "szsh", "name": "深圳租房", "start_time": START_TIME},
-    {"id": "609271", "name": "深圳租房", "start_time": START_TIME},
-    {"id": "longgangzufang", "name": "龙岗租房", "start_time": START_TIME}
+    {"id": "603687", "name": "厦门租房", "start_time": START_TIME},
+    {"id": "xiamen", "name": "厦门租房", "start_time": START_TIME},
+    {"id": "627050", "name": "厦门租房", "start_time": START_TIME}
 ]
 
-# 匹配规则,符合其中至少一个条件的才进行推送
-MATCH_RULES = [
-    r"四联|六约北|石芽岭|布吉|罗湖北|黄木岗|岗厦北|老街|红岭|晒布|翠竹|田贝|水贝|草埔|笋岗|洪湖"
-]
-
-# 排除规则,此规则中的内容,即便匹配成功了也不进行推送
-EXCLUDE_RULES = [
-    r"求租|合租",
-    r"\d{4}起"
-]
-
-# 租金区间限制,(目前只会提取四位数的租金，且有一定概率识别错误)
-# 不限制
-# RENT_RANGE = ()
-# 仅推送1-3k的帖子，最低为1000，最高9999
+# 全局配置（备用）
+MATCH_RULES = []
+EXCLUDE_RULES = []
 RENT_RANGE = (1000, 3000)
-
-# 接口请求间隔(秒),默认10-20秒随机
 REQUEST_INTERVAL = (10, 20)
-
-# 监控周期(秒),两次循环中间的间隔时长,默认1小时
 WATCH_INTERVAL = 3600
-
-# 消息通知配置
 NOTIFY = {
-    # 渠道 feishu:飞书 work.weixin:企业微信 dingtalk:钉钉
     "channel": "feishu",
-    # 机器人WebHook地址
     "url": ""
 }

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豆瓣租房监控</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #007aff;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #34c759;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #2db840;
+        }
+        .btn-danger {
+            background: #ff3b30;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #d63028;
+        }
+        .btn-secondary {
+            background: #8e8e93;
+            color: #fff;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 12px 24px;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .tab.active {
+            background: #007aff;
+            color: #fff;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            flex: 1;
+            text-align: center;
+        }
+        .stat-card .num {
+            font-size: 32px;
+            color: #007aff;
+            font-weight: bold;
+        }
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .post-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .post-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .post-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .post-title a:hover {
+            color: #007aff;
+        }
+        .post-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+        .post-meta .rent {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        .post-meta .city-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .post-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .post-author {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #888;
+        }
+        .post-author a {
+            color: #007aff;
+            text-decoration: none;
+        }
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .filter-bar {
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-bar input, .filter-bar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .city-select {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .config-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .config-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .city-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .city-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .city-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .city-item-header h3 {
+            color: #333;
+        }
+        .city-item-header .actions {
+            display: flex;
+            gap: 8px;
+        }
+        .city-item-header .btn {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        .city-details {
+            font-size: 14px;
+            color: #666;
+        }
+        .city-details .keywords {
+            margin-bottom: 8px;
+        }
+        .city-details .keywords span {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        .form-group .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 豆瓣租房监控</h1>
+            <div class="header-right">
+                <button class="btn btn-success" onclick="showAddCityModal()">➕ 添加城市</button>
+                <button class="btn btn-primary" onclick="loadPosts()">🔄 刷新数据</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('posts')">📋 帖子列表</button>
+            <button class="tab" onclick="switchTab('config')">⚙️ 城市配置</button>
+        </div>
+
+        <div id="postsView">
+            <div class="filter-bar">
+                <select id="citySelect" class="city-select" onchange="changeCity()">
+                    <option value="all">全部城市</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="搜索标题或内容..." oninput="filterPosts()">
+                <select id="rentFilter" onchange="filterPosts()">
+                    <option value="all">租金不限</option>
+                    <option value="0-1000">1000元以下</option>
+                    <option value="1000-2000">1000-2000元</option>
+                    <option value="2000-3000">2000-3000元</option>
+                    <option value="3000-5000">3000-5000元</option>
+                    <option value="5000+">5000元以上</option>
+                </select>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="num" id="totalCount">0</div>
+                    <div class="label">总帖子数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="todayCount">0</div>
+                    <div class="label">今日新增</div>
+                </div>
+                <div class="stat-card">
+                    <div class="num" id="withRentCount">0</div>
+                    <div class="label">有租金信息</div>
+                </div>
+            </div>
+
+            <div class="posts-grid" id="postsGrid">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <div id="configView" style="display: none;">
+            <div class="config-section">
+                <h2>城市配置</h2>
+                <div class="city-list" id="cityList">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="cityModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">添加城市</h2>
+            <form id="cityForm">
+                <div class="form-group">
+                    <label>城市名称</label>
+                    <input type="text" id="cityName" placeholder="例如: 深圳" required>
+                </div>
+                <div class="form-group">
+                    <label>匹配关键词</label>
+                    <textarea id="cityKeywords" placeholder="输入关键词，用逗号或换行分隔&#10;例如: 深圳, 南山, 罗湖, 福田"></textarea>
+                    <div class="hint">在帖子标题或内容中包含这些关键词时，自动归类到该城市</div>
+                </div>
+                <div class="form-group">
+                    <label>排除关键词</label>
+                    <textarea id="cityExcludeKeywords" placeholder="输入排除关键词，用逗号或换行分隔&#10;例如: 求租, 合租"></textarea>
+                    <div class="hint">包含这些关键词的帖子将被排除</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>最低租金</label>
+                        <input type="number" id="rentMin" placeholder="例如: 1000" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>最高租金</label>
+                        <input type="number" id="rentMax" placeholder="例如: 3000" value="99999">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let allPosts = [];
+        let currentCity = 'all';
+        let cityConfig = [];
+        let editingCityName = null;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'posts') {
+                document.getElementById('postsView').style.display = 'block';
+                document.getElementById('configView').style.display = 'none';
+            } else {
+                document.getElementById('postsView').style.display = 'none';
+                document.getElementById('configView').style.display = 'block';
+                loadCityConfig();
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            if (minutes < 60) return `${minutes}分钟前`;
+            if (hours < 24) return `${hours}小时前`;
+            if (days < 7) return `${days}天前`;
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        function formatRent(rent) {
+            if (!rent) return '面议';
+            return `${rent}元/月`;
+        }
+
+        function isToday(dateStr) {
+            if (!dateStr) return false;
+            const date = new Date(dateStr);
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+
+        function renderPosts(posts) {
+            const grid = document.getElementById('postsGrid');
+            if (posts.length === 0) {
+                grid.innerHTML = '<div class="empty">暂无数据</div>';
+                return;
+            }
+            grid.innerHTML = posts.map(post => `
+                <div class="post-card">
+                    <div class="post-title">
+                        <a href="${post.url}" target="_blank">${post.title || '无标题'}</a>
+                    </div>
+                    <div class="post-meta">
+                        ${post.city ? `<span class="city-tag">${post.city}</span>` : ''}
+                        <span class="rent">${formatRent(post.rent)}</span>
+                        <span>发布时间: ${formatDate(post.create_time)}</span>
+                    </div>
+                    <div class="post-content">${post.content || ''}</div>
+                    <div class="post-author">
+                        作者: <a href="${post.author?.url}" target="_blank">${post.author?.name || '未知'}</a>
+                    </div>
+                </div>
+            `).join('');
+            updateStats(posts);
+        }
+
+        function updateStats(posts) {
+            document.getElementById('totalCount').textContent = posts.length;
+            document.getElementById('todayCount').textContent = posts.filter(p => isToday(p.create_time)).length;
+            document.getElementById('withRentCount').textContent = posts.filter(p => p.rent).length;
+        }
+
+        function filterPosts() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const rentFilter = document.getElementById('rentFilter').value;
+            let filtered = allPosts.filter(post => {
+                const matchSearch = !search || 
+                    (post.title && post.title.toLowerCase().includes(search)) ||
+                    (post.content && post.content.toLowerCase().includes(search));
+                if (!matchSearch) return false;
+                if (rentFilter === 'all') return true;
+                const rent = post.rent;
+                if (!rent) return rentFilter === 'all';
+                if (rentFilter === '0-1000') return rent < 1000;
+                if (rentFilter === '1000-2000') return rent >= 1000 && rent < 2000;
+                if (rentFilter === '2000-3000') return rent >= 2000 && rent < 3000;
+                if (rentFilter === '3000-5000') return rent >= 3000 && rent < 5000;
+                if (rentFilter === '5000+') return rent >= 5000;
+                return true;
+            });
+            renderPosts(filtered);
+        }
+
+        function changeCity() {
+            currentCity = document.getElementById('citySelect').value;
+            loadPosts();
+        }
+
+        async function loadPosts() {
+            const grid = document.getElementById('postsGrid');
+            grid.innerHTML = '<div class="loading">加载中...</div>';
+            try {
+                let url = '/api/posts';
+                if (currentCity && currentCity !== 'all') {
+                    url += '?city=' + encodeURIComponent(currentCity);
+                }
+                const response = await fetch(url);
+                allPosts = await response.json();
+                allPosts.sort((a, b) => new Date(b.create_time) - new Date(a.create_time));
+                renderPosts(allPosts);
+            } catch (error) {
+                grid.innerHTML = '<div class="empty">加载失败，请刷新重试</div>';
+                console.error(error);
+            }
+        }
+
+        async function loadCities() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                cityConfig = config.city_config || [];
+                const select = document.getElementById('citySelect');
+                select.innerHTML = '<option value="all">全部城市</option>';
+                config.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadCityConfig() {
+            const list = document.getElementById('cityList');
+            try {
+                const response = await fetch('/api/city/config');
+                const config = await response.json();
+                const cities = config.cities || [];
+                if (cities.length === 0) {
+                    list.innerHTML = '<div class="empty">暂无城市配置，请添加</div>';
+                    return;
+                }
+                list.innerHTML = cities.map(city => `
+                    <div class="city-item">
+                        <div class="city-item-header">
+                            <h3>${city.name}</h3>
+                            <div class="actions">
+                                <button class="btn btn-primary" onclick="editCity('${city.name}')">编辑</button>
+                                <button class="btn btn-danger" onclick="deleteCity('${city.name}')">删除</button>
+                            </div>
+                        </div>
+                        <div class="city-details">
+                            <div class="keywords">
+                                <strong>匹配关键词:</strong><br>
+                                ${(city.keywords || []).map(k => `<span>${k}</span>`).join('')}
+                            </div>
+                            <div class="keywords">
+                                <strong>排除关键词:</strong><br>
+                                ${(city.exclude_keywords || []).map(k => `<span>${k}</span>`).join('')}
+                            </div>
+                            <div>租金范围: ${city.rent_min || 0} - ${city.rent_max || '不限'} 元/月</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = '<div class="empty">加载失败</div>';
+                console.error(error);
+            }
+        }
+
+        function showAddCityModal() {
+            editingCityName = null;
+            document.getElementById('modalTitle').textContent = '添加城市';
+            document.getElementById('cityForm').reset();
+            document.getElementById('cityModal').classList.add('show');
+        }
+
+        function editCity(cityName) {
+            editingCityName = cityName;
+            const city = cityConfig.find(c => c.name === cityName);
+            if (!city) return;
+            document.getElementById('modalTitle').textContent = '编辑城市';
+            document.getElementById('cityName').value = city.name;
+            document.getElementById('cityKeywords').value = (city.keywords || []).join(', ');
+            document.getElementById('cityExcludeKeywords').value = (city.exclude_keywords || []).join(', ');
+            document.getElementById('rentMin').value = city.rent_min || 0;
+            document.getElementById('rentMax').value = city.rent_max || 99999;
+            document.getElementById('cityModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('cityModal').classList.remove('show');
+        }
+
+        async function deleteCity(cityName) {
+            if (!confirm(`确定要删除城市"${cityName}"吗？`)) return;
+            try {
+                await fetch(`/api/city/${encodeURIComponent(cityName)}`, { method: 'DELETE' });
+                loadCityConfig();
+                loadCities();
+            } catch (error) {
+                alert('删除失败');
+            }
+        }
+
+        document.getElementById('cityForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('cityName').value.trim();
+            const keywords = document.getElementById('cityKeywords').value
+                .split(/[,，\n]/)
+                .map(k => k.trim())
+                .filter(k => k);
+            const excludeKeywords = document.getElementById('cityExcludeKeywords').value
+                .split(/[,，\n]/)
+                .map(k => k.trim())
+                .filter(k => k);
+            const rentMin = parseInt(document.getElementById('rentMin').value) || 0;
+            const rentMax = parseInt(document.getElementById('rentMax').value) || 99999;
+            
+            const cityData = {
+                name,
+                keywords,
+                exclude_keywords: excludeKeywords,
+                rent_min: rentMin,
+                rent_max: rentMax
+            };
+            
+            try {
+                if (editingCityName) {
+                    await fetch(`/api/city/${encodeURIComponent(editingCityName)}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(cityData)
+                    });
+                } else {
+                    await fetch('/api/city', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(cityData)
+                    });
+                }
+                closeModal();
+                loadCityConfig();
+                loadCities();
+            } catch (error) {
+                alert('保存失败');
+            }
+        };
+
+        loadCities();
+        loadPosts();
+        setInterval(loadPosts, 30000);
+    </script>
+</body>
+</html>

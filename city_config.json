@@ -1,0 +1,18 @@
+{
+  "cities": [
+    {
+      "name": "厦门",
+      "keywords": [
+        "湖里区",
+        "思明区",
+        "集美区"
+      ],
+      "exclude_keywords": [
+        "求租",
+        "合租"
+      ],
+      "rent_min": 1000,
+      "rent_max": 3000
+    }
+  ]
+}

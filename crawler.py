@@ -5,6 +5,7 @@ import time
 
 import requests
 
+import data
 import notify
 from config import GROUP_LIST, HEADERS, REQUEST_INTERVAL
 from parse import parse_list, parse_detail
@@ -58,6 +59,7 @@ def crawl_detail(url, start_time):
         return {}
     post = parse_detail(html)
     post['url'] = url
+    city = data.save_post(post)
     if notify.meet_condition(post, start_time):
         msg = f'**标题**：[{post["title"]}]({url})\n**租金**：{post["rent"]}\n**发布时间**：{post["create_time"]}\n**作者**：[{post["author"]["name"]}]({post["author"]["url"]})\n**内容**：{post["content"]}'
         notify.send_msg(msg)
